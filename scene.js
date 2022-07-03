@@ -39,7 +39,43 @@ function resizeWindow(eventParam) {
     sceneElements.renderer.setSize(width, height);
 }
 
+// Keep track of the keyboard WASD - Adapted from script 4 ex3 of the pratical classes 
+let keyD = false, keyA = false, keyS = false, keyW = false;
+document.addEventListener('keydown', onDocumentKeyDown, false);
+document.addEventListener('keyup', onDocumentKeyUp, false);
 
+function onDocumentKeyDown(event) {
+    switch (event.keyCode) {
+        case 68: //d
+            keyD = true;
+            break;
+        case 83: //s
+            keyS = true;
+            break;
+        case 65: //a
+            keyA = true;
+            break;
+        case 87: //w
+            keyW = true;
+            break;
+    }
+}
+function onDocumentKeyUp(event) {
+    switch (event.keyCode) {
+        case 68: //d
+            keyD = false;
+            break;
+        case 83: //s
+            keyS = false;
+            break;
+        case 65: //a
+            keyA = false;
+            break;
+        case 87: //w
+            keyW = false;
+            break;
+    }
+}
 
 //////////////////////////////////////////////////////////////////
 
@@ -94,7 +130,7 @@ function load3DObjects(sceneGraph) {
     leanOnWall(person1);
 
     const person2 = createPerson();
-    person2.translateX(45).translateY(4+ 2.2);
+    person2.translateX(-8).translateY(0.5).translateZ(8);
     turtleBackGroup.add(person2);
 
     // put person2 in a sitting position
@@ -107,8 +143,8 @@ function loadGui(sceneGraph) {
     gui.add(sceneGraph.getObjectByName("lightGroup").rotation, "x", -Math.PI, Math.PI).name("Time of Day").listen();
 }
 
-// Displacement value
 
+// Displacement value
 var delta = 0.1;
 
 // animation flags and variables
@@ -146,6 +182,19 @@ function computeFrame(time) {
 
     rumble -= 2;
     if (rumble < 0) rumble = 0;
+
+
+    // control turtle head
+    const turtleHead = turtle.getObjectByName("head");
+    const rotIncrement = 0.01, rotLimit = Math.PI/8;
+    if (keyA && turtleHead.rotation.y < rotLimit)
+        turtleHead.rotateY(rotIncrement);
+    if (keyD && turtleHead.rotation.y > -rotLimit)
+        turtleHead.rotateY(-rotIncrement);
+    if (keyW && turtleHead.rotation.z < rotLimit)
+        turtleHead.rotateZ(rotIncrement);
+    if (keyS && turtleHead.rotation.z > -rotLimit)
+        turtleHead.rotateZ(-rotIncrement);
 
     // Rendering
     helper.render(sceneElements);
@@ -278,6 +327,11 @@ function createTurtle() {
     // -------------------- //
     // the turtle's head    //
     // -------------------- //
+    const headGroup = new THREE.Group();
+    headGroup.name = "head";
+    turtle.add(headGroup);
+    headGroup.position.set(35, 20, 0);
+
     const headTextureX = new THREE.TextureLoader().load(TEXTURE_PATH + "turtle_skin.jpg");
     headTextureX.wrapS = THREE.RepeatWrapping;
     headTextureX.wrapT = THREE.RepeatWrapping;
@@ -304,8 +358,8 @@ function createTurtle() {
     headObject.name = "head";
     headObject.castShadow = true;
     headObject.receiveShadow = true;
-    turtle.add(headObject);
-    headObject.position.set(35+10, 20+8, 0);
+    headGroup.add(headObject);
+    headObject.position.set(10, 8, 0);
 
     // eyes
     const eyeGeometry = new THREE.SphereGeometry(2, 8, 8);
