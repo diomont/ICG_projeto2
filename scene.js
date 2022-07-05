@@ -149,7 +149,8 @@ function load3DObjects(sceneGraph) {
     const turtleBackGroup = new THREE.Group();
     turtleBackGroup.name = "turtleBackGroup";
     turtleBackGroup.position.copy(backPosition);
-    sceneGraph.add(turtleBackGroup);
+    turtle.add(turtleBackGroup)
+    //sceneGraph.add(turtleBackGroup);
 
 
     const house = createHouse();
@@ -249,6 +250,24 @@ function computeFrame(time) {
 
 // ******************* Models *********************
 
+// helper function
+function applyTexture(material, textureName, repeatX, repeatY, bumpName = null) {
+    const texture = new THREE.TextureLoader().load(TEXTURE_PATH + textureName);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(repeatX, repeatY);
+    material.map = texture;
+
+    if (bumpName) {
+        const bump = new THREE.TextureLoader().load(TEXTURE_PATH + textureName);
+        bump.wrapS = THREE.RepeatWrapping;
+        bump.wrapT = THREE.RepeatWrapping;
+        bump.repeat.set(repeatX, repeatY);
+        material.bumpMap = bump;
+    }
+}
+
+
 function createTurtle() {
 
     const turtle = new THREE.Group();
@@ -256,33 +275,18 @@ function createTurtle() {
     // -------------------- //
     // the turtle's body    //
     // -------------------- //
-    const bodyTextureX = new THREE.TextureLoader().load(TEXTURE_PATH + "grassy_rock.jpg");
-    bodyTextureX.wrapS = THREE.RepeatWrapping;
-    bodyTextureX.wrapT = THREE.RepeatWrapping;
-    bodyTextureX.repeat.set(2.5, 1);
     const bodyMaterialX = new THREE.MeshPhongMaterial();
-    bodyMaterialX.map = bodyTextureX;
+    applyTexture(bodyMaterialX, "grassy_rock.jpg", 2.5, 1, "grassy_rock.jpg");
 
-    const bodyTextureZ = new THREE.TextureLoader().load(TEXTURE_PATH + "grassy_rock.jpg");
-    bodyTextureZ.wrapS = THREE.RepeatWrapping;
-    bodyTextureZ.wrapT = THREE.RepeatWrapping;
-    bodyTextureZ.repeat.set(3.5, 1);
     const bodyMaterialZ = new THREE.MeshPhongMaterial();
-    bodyMaterialZ.map = bodyTextureZ;
+    applyTexture(bodyMaterialZ, "grassy_rock.jpg", 3.5, 1, "grassy_rock.jpg");
 
-    const bodyTextureTop = new THREE.TextureLoader().load(TEXTURE_PATH + "turtle_top.jpg");
-    bodyTextureTop.wrapS = THREE.RepeatWrapping;
-    bodyTextureTop.wrapT = THREE.RepeatWrapping;
-    bodyTextureTop.repeat.set(3.5, 2.5);
     const bodyMaterialTop = new THREE.MeshPhongMaterial();
-    bodyMaterialTop.map = bodyTextureTop;
+    applyTexture(bodyMaterialTop, "turtle_top.jpg", 3.5, 2.5, "turtle_top.jpg");
 
-    const bodyTextureBottom = new THREE.TextureLoader().load(TEXTURE_PATH + "grassy_rock.jpg");
-    bodyTextureBottom.wrapS = THREE.RepeatWrapping;
-    bodyTextureBottom.wrapT = THREE.RepeatWrapping;
-    bodyTextureBottom.repeat.set(3.5, 2.5);
     const bodyMaterialBottom = new THREE.MeshPhongMaterial();
-    bodyMaterialBottom.map = bodyTextureBottom;
+    applyTexture(bodyMaterialBottom, "grassy_rock.jpg", 3.5, 2.5, "grassy_rock.jpg");
+
 
     const bodyGeometry = new THREE.BoxGeometry(70, 20, 50);
     const bodyObject = new THREE.Mesh(bodyGeometry, [
@@ -299,18 +303,13 @@ function createTurtle() {
     // -------------------- //
     // the turtle's legs    //
     // -------------------- //
-    // leg texture
-    const legTexture = new THREE.TextureLoader().load(TEXTURE_PATH + "turtle_skin.jpg");
-    legTexture.wrapS = THREE.RepeatWrapping;
-    legTexture.wrapT = THREE.RepeatWrapping;
-    legTexture.repeat.set(2, 1)
 
     // base leg components
     const lowerLegGeometry = new THREE.CylinderGeometry(7, 8, 8, 5);
     const upperLegGeometry = new THREE.CylinderGeometry(5, 7, 12, 5);
     const legJointGeometry = new THREE.SphereGeometry(7, 7, 7);
     const legMaterial = new THREE.MeshPhongMaterial();
-    legMaterial.map = legTexture;
+    applyTexture(legMaterial, "turtle_skin.jpg", 2, 1, "turtle_skin.jpg");
     const lowerLegObject = new THREE.Mesh(lowerLegGeometry, legMaterial);
     lowerLegObject.name = "lowerLeg";
     const upperLegObject = new THREE.Mesh(upperLegGeometry, legMaterial);
@@ -372,29 +371,11 @@ function createTurtle() {
     turtle.add(headGroup);
     headGroup.position.set(35, 20, 0);
 
-    const headTextureX = new THREE.TextureLoader().load(TEXTURE_PATH + "turtle_skin.jpg");
-    headTextureX.wrapS = THREE.RepeatWrapping;
-    headTextureX.wrapT = THREE.RepeatWrapping;
-    const headMaterialX = new THREE.MeshPhongMaterial();
-    headMaterialX.map = headTextureX;
-
-    const headTextureZ = new THREE.TextureLoader().load(TEXTURE_PATH + "turtle_skin.jpg");
-    headTextureZ.wrapS = THREE.RepeatWrapping;
-    headTextureZ.wrapT = THREE.RepeatWrapping;
-    const headMaterialZ = new THREE.MeshPhongMaterial();
-    headMaterialZ.map = headTextureZ;
-
-    const headTextureY = new THREE.TextureLoader().load(TEXTURE_PATH + "turtle_skin.jpg");
-    headTextureY.wrapS = THREE.RepeatWrapping;
-    headTextureY.wrapT = THREE.RepeatWrapping;
-    const headMaterialY = new THREE.MeshPhongMaterial();
-    headMaterialY.map = headTextureY;
+    const headMaterial = new THREE.MeshPhongMaterial();
+    applyTexture(headMaterial, "turtle_skin.jpg", 1, 1, "turtle_skin.jpg");
 
     const headGeometry = new THREE.BoxGeometry(20, 16, 20);
-    const headObject = new THREE.Mesh(headGeometry, [
-        headMaterialZ, headMaterialZ, headMaterialY,
-        headMaterialY, headMaterialX, headMaterialX
-    ]);
+    const headObject = new THREE.Mesh(headGeometry, headMaterial);
     headObject.name = "head";
     headObject.castShadow = true;
     headObject.receiveShadow = true;
@@ -421,7 +402,7 @@ function createTurtle() {
     const backHelper = new THREE.Object3D();
     backHelper.name = "backHelper"
     backHelper.position.y = 30;
-    turtle.add(backHelper);
+    bodyObject.add(backHelper);
 
     return turtle;
 }
@@ -433,10 +414,14 @@ function createHouse() {
     const baseTextureWall = new THREE.TextureLoader().load(TEXTURE_PATH + "wall.jpg");
     const baseMaterial = new THREE.MeshPhongMaterial();
     baseMaterial.map = baseTextureWall;
+    baseMaterial.bumpMap = baseTextureWall;
+    baseMaterial.bumpHeight = 0.02;
 
     const baseTextureDoor = new THREE.TextureLoader().load(TEXTURE_PATH + "wall_door.jpg");
     const baseMaterialDoor = new THREE.MeshPhongMaterial();
     baseMaterialDoor.map = baseTextureDoor;
+    baseMaterialDoor.bumpMap = baseTextureDoor;
+    baseMaterial.bumpHeight = 0.02;
 
     const baseGeometry = new THREE.BoxGeometry(16, 8, 12);
     const baseObject = new THREE.Mesh(baseGeometry, [
@@ -449,13 +434,8 @@ function createHouse() {
     baseObject.position.y = 4;
 
     // ----------- roof of the house -------------
-    const roofTexture = new THREE.TextureLoader().load(TEXTURE_PATH + "roof.jpg")
-    roofTexture.wrapS = THREE.RepeatWrapping;
-    roofTexture.wrapT = THREE.RepeatWrapping;
-    roofTexture.repeat.set(2, 2);
-
     const roofTopMaterial = new THREE.MeshPhongMaterial();
-    roofTopMaterial.map = roofTexture;
+    applyTexture(roofTopMaterial, "roof.jpg", 2, 2);
     const roofSideMaterial = new THREE.MeshPhongMaterial({ color: 0x984C32 });
 
     const roofGeometry = new THREE.CylinderGeometry(9, 9, 16, 3);
@@ -474,13 +454,9 @@ function createHouse() {
 function createTower() {
     const tower = new THREE.Group();
 
-    const baseTexture = new THREE.TextureLoader().load(TEXTURE_PATH + "wall.jpg")
-    baseTexture.wrapS = THREE.RepeatWrapping;
-    baseTexture.wrapT = THREE.RepeatWrapping;
-    baseTexture.repeat.set(6, 1.6);
-
     const baseMaterial = new THREE.MeshPhongMaterial();
-    baseMaterial.map = baseTexture;
+    applyTexture(baseMaterial, "wall.jpg", 6, 1.6, "wall.jpg");
+    baseMaterial.bumpHeight = 0.02;
 
     const baseGeometry = new THREE.CylinderGeometry(7, 7, 12, 12);
     const baseObject = new THREE.Mesh(baseGeometry, baseMaterial);
@@ -801,18 +777,19 @@ function animateTurtle(turtle, turtleBack, step) {
         rightFrontLeg.rotateY(step/15);
         leftBackLeg.rotateY(step/15);
         turtle.rotateY(step/120);
-        turtleBack.rotateY(step/120);
+        //turtleBack.rotateY(step/120);
 
         turtle.translateZ(-0.02);
-        turtleBack.translateZ(-0.02);
+        //turtleBack.translateZ(-0.02);
 
         turtle.rotateX(-0.0002);
-        turtleBack.rotateX(-0.0002);
+        //turtleBack.rotateX(-0.0002);
         turtle.rotateZ(0.0002);
-        turtleBack.rotateZ(0.0002);
+        //turtleBack.rotateZ(0.0002);
 
         if (turtle.rotation.y >= Math.PI/26) {
             turtle.rotation.y = Math.PI/26;
+            //turtleBack.rotation.y = Math.PI/26;
             turtleAnimStage = 1;
             waitTime = step*20;  // wait 20 frames before next stage
         }
@@ -821,18 +798,19 @@ function animateTurtle(turtle, turtleBack, step) {
         rightFrontLeg.rotateY(-step/15);
         leftBackLeg.rotateY(-step/15);
         turtle.rotateY(-step/120);
-        turtleBack.rotateY(-step/120);
+        //turtleBack.rotateY(-step/120);
 
         turtle.translateZ(0.02);
-        turtleBack.translateZ(0.02);
+        //turtleBack.translateZ(0.02);
 
         turtle.rotateX(0.0002);
-        turtleBack.rotateX(0.0002);
+        //turtleBack.rotateX(0.0002);
         turtle.rotateZ(-0.0002);
-        turtleBack.rotateZ(-0.0002);
+        //turtleBack.rotateZ(-0.0002);
 
         if (turtle.rotation.y <= 0) {
             turtle.rotation.y = 0;
+            //turtleBack.rotation.y = 0;
             turtleAnimStage = 2;
             rumble = 50;
             waitTime = step*40;  // wait 40 frames before next stage
@@ -843,18 +821,19 @@ function animateTurtle(turtle, turtleBack, step) {
         leftFrontLeg.rotateY(-step/15);
         rightBackLeg.rotateY(-step/15);
         turtle.rotateY(-step/120);
-        turtleBack.rotateY(-step/120);
+        //turtleBack.rotateY(-step/120);
 
         turtle.translateZ(0.02);
-        turtleBack.translateZ(0.02);
+        //turtleBack.translateZ(0.02);
 
         turtle.rotateX(0.0002);
-        turtleBack.rotateX(0.0002);
+        //turtleBack.rotateX(0.0002);
         turtle.rotateZ(0.0002);
-        turtleBack.rotateZ(0.0002);
+        //turtleBack.rotateZ(0.0002);
 
         if (turtle.rotation.y <= -Math.PI/26) {
             turtle.rotation.y = -Math.PI/26;
+            //turtleBack.rotation.y = -Math.PI/26;
             turtleAnimStage = 3;
             waitTime = step*20;  // wait 20 frames before next stage
         }
@@ -863,18 +842,19 @@ function animateTurtle(turtle, turtleBack, step) {
         leftFrontLeg.rotateY(step/15);
         rightBackLeg.rotateY(step/15);
         turtle.rotateY(step/120);
-        turtleBack.rotateY(step/120);
+        //turtleBack.rotateY(step/120);
 
         turtle.translateZ(-0.02);
-        turtleBack.translateZ(-0.02);
+        //turtleBack.translateZ(-0.02);
 
         turtle.rotateX(-0.0002);
-        turtleBack.rotateX(-0.0002);
+        //turtleBack.rotateX(-0.0002);
         turtle.rotateZ(-0.0002);
-        turtleBack.rotateZ(-0.0002);
+        //turtleBack.rotateZ(-0.0002);
 
         if (turtle.rotation.y >= 0) {
             turtle.rotation.y = 0;
+            //turtleBack.rotation.y = 0;
             turtleAnimStage = 0;
             rumble = 50;
             waitTime = step*40;  // wait 40 frames before next stage
