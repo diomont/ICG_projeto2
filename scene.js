@@ -77,6 +77,46 @@ function onDocumentKeyUp(event) {
     }
 }
 
+// Selecting objects with the mouse - adapted from script 7 example 3_1 of the pratical classes 
+
+//mouse event variables
+const projector = new THREE.Projector(),
+    mouse_vector = new THREE.Vector3(),
+    mouse = { x: 0, y: 0, z: 1 },
+    ray = new THREE.Raycaster(new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 0)),
+    intersects1 = [],
+    intersects2 = [];
+
+function mouseDown(e) {
+
+    e.preventDefault();
+
+    // processing cursor coordinates
+    mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    mouse_vector.set(mouse.x, mouse.y, mouse.z);
+
+    // point in 3D space
+    mouse_vector.unproject(sceneElements.camera);
+    // direction in 3D space
+    let direction = mouse_vector.sub(sceneElements.camera.position).normalize();
+    // cast ray from camera 
+    ray.set(sceneElements.camera.position, direction);
+
+    // check if ray intersects one or more trees
+    let treeArray = sceneElements.sceneGraph.getObjectByName("terrain1").getObjectByName("trees").children;
+    treeArray = treeArray.concat(sceneElements.sceneGraph.getObjectByName("terrain2").getObjectByName("trees").children);
+    treeArray = treeArray.concat(sceneElements.sceneGraph.getObjectByName("terrain3").getObjectByName("trees").children);
+
+    let intersects = ray.intersectObjects(treeArray);
+
+    // set each intersected tree to be destroyed
+    for (let i = 0; i < intersects.length; i++) {
+        treesToDestroy.push(intersects[i].object)
+    }
+}
+sceneElements.renderer.domElement.addEventListener("mousedown", mouseDown);
+
 //////////////////////////////////////////////////////////////////
 
 
